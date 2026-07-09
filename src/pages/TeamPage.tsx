@@ -24,7 +24,7 @@ export function TeamPage() {
   const [memberToDelete, setMemberToDelete] = useState<Member | null>(null)
 
   useEffect(() => {
-    if (!hasLoaded) fetchMembers()
+    if (!hasLoaded) void fetchMembers()
   }, [hasLoaded, fetchMembers])
 
   function handleAdd() {
@@ -39,9 +39,13 @@ export function TeamPage() {
 
   async function handleDeleteConfirmed() {
     if (!memberToDelete) return
-    await unassignMember(memberToDelete.id)
-    await removeMember(memberToDelete.id)
-    toast.success("Membre retiré de l'équipe")
+    try {
+      await unassignMember(memberToDelete.id)
+      await removeMember(memberToDelete.id)
+      toast.success("Membre retiré de l'équipe")
+    } catch {
+      // L'erreur est déjà signalée par le store via un toast.
+    }
   }
 
   if (!hasLoaded) {

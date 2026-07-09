@@ -1,5 +1,6 @@
 import { create } from "zustand"
 import * as membersApi from "@/features/members/api/members.api"
+import { reportError } from "@/lib/errors"
 import type { Member, MemberInput } from "@/features/members/types"
 
 interface MembersState {
@@ -20,23 +21,40 @@ export const useMembersStore = create<MembersState>((set, get) => ({
 
   fetchMembers: async () => {
     set({ isLoading: true })
-    const members = await membersApi.listMembers()
-    set({ members, isLoading: false, hasLoaded: true })
+    try {
+      const members = await membersApi.listMembers()
+      set({ members, isLoading: false, hasLoaded: true })
+    } catch (error) {
+      set({ isLoading: false })
+      reportError("Impossible de charger les membres.", error)
+    }
   },
 
   addMember: async (input) => {
-    const member = await membersApi.createMember(input)
-    set({ members: [...get().members, member] })
+    try {
+      const member = await membersApi.createMember(input)
+      set({ members: [...get().members, member] })
+    } catch (error) {
+      reportError("Impossible d'ajouter ce membre.", error)
+    }
   },
 
   editMember: async (id, patch) => {
-    const updated = await membersApi.updateMember(id, patch)
-    set({ members: get().members.map((m) => (m.id === id ? updated : m)) })
+    try {
+      const updated = await membersApi.updateMember(id, patch)
+      set({ members: get().members.map((m) => (m.id === id ? updated : m)) })
+    } catch (error) {
+      reportError("Impossible de mettre à jour ce membre.", error)
+    }
   },
 
   removeMember: async (id) => {
-    await membersApi.deleteMember(id)
-    set({ members: get().members.filter((m) => m.id !== id) })
+    try {
+      await membersApi.deleteMember(id)
+      set({ members: get().members.filter((m) => m.id !== id) })
+    } catch (error) {
+      reportError("Impossible de supprimer ce membre.", error)
+    }
   },
 
   getMemberById: (id) => {

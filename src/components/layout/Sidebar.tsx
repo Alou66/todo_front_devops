@@ -1,10 +1,11 @@
 import { NavLink } from "react-router-dom"
-import { KanbanSquare, ShoppingBag, Users } from "lucide-react"
+import { KanbanSquare, ShoppingBag, Tag, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const NAV_ITEMS = [
   { to: "/", label: "Tableau des tâches", icon: KanbanSquare, end: true },
   { to: "/equipe", label: "Équipe", icon: Users, end: false },
+  { to: "/etiquettes", label: "Étiquettes", icon: Tag, end: false },
 ]
 
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {

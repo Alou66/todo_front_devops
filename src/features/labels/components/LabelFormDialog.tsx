@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 
 import { cn } from "@/lib/utils"
-import { MEMBER_COLORS } from "@/lib/constants"
+import { LABEL_COLORS } from "@/lib/constants"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -24,62 +24,58 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 
-import { useMembersStore } from "@/features/members/store/members.store"
-import type { Member } from "@/features/members/types"
+import { useLabelsStore } from "@/features/labels/store/labels.store"
+import type { TaskLabel } from "@/features/labels/types"
 
-const memberFormSchema = z.object({
-  name: z.string().trim().min(2, "Le nom doit contenir au moins 2 caractères."),
-  email: z.email("Adresse e-mail invalide."),
-  role: z.string().trim().min(2, "Précisez le rôle ou le service."),
+const labelFormSchema = z.object({
+  name: z.string().trim().min(2, "Le nom doit contenir au moins 2 caractères.").max(40),
   color: z.string(),
 })
 
-type MemberFormValues = z.infer<typeof memberFormSchema>
+type LabelFormValues = z.infer<typeof labelFormSchema>
 
-function buildDefaultValues(member: Member | undefined): MemberFormValues {
+function buildDefaultValues(label: TaskLabel | undefined): LabelFormValues {
   return {
-    name: member?.name ?? "",
-    email: member?.email ?? "",
-    role: member?.role ?? "",
-    color: member?.color ?? MEMBER_COLORS[0],
+    name: label?.name ?? "",
+    color: label?.color ?? LABEL_COLORS[0],
   }
 }
 
-export function MemberFormDialog({
+export function LabelFormDialog({
   open,
   onOpenChange,
-  member,
+  label,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  member?: Member
+  label?: TaskLabel
 }) {
-  const addMember = useMembersStore((s) => s.addMember)
-  const editMember = useMembersStore((s) => s.editMember)
+  const addLabel = useLabelsStore((s) => s.addLabel)
+  const editLabel = useLabelsStore((s) => s.editLabel)
 
-  const form = useForm<MemberFormValues>({
-    resolver: zodResolver(memberFormSchema),
-    defaultValues: buildDefaultValues(member),
+  const form = useForm<LabelFormValues>({
+    resolver: zodResolver(labelFormSchema),
+    defaultValues: buildDefaultValues(label),
   })
 
   useEffect(() => {
-    if (open) form.reset(buildDefaultValues(member))
+    if (open) form.reset(buildDefaultValues(label))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, member])
+  }, [open, label])
 
-  const isEditing = Boolean(member)
+  const isEditing = Boolean(label)
   const selectedColor = form.watch("color")
 
-  async function onSubmit(values: MemberFormValues) {
+  async function onSubmit(values: LabelFormValues) {
     try {
-      if (member) {
-        await editMember(member.id, values)
+      if (label) {
+        await editLabel(label.id, values)
       } else {
-        await addMember(values)
+        await addLabel(values)
       }
       onOpenChange(false)
     } catch {
-      // L'erreur est déjà signalée par le store via un toast ; on garde le dialog ouvert.
+      // L'erreur est déjà signalée par le store via un toast.
     }
   }
 
@@ -87,11 +83,11 @@ export function MemberFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Modifier le membre" : "Ajouter un membre"}</DialogTitle>
+          <DialogTitle>{isEditing ? "Modifier l'étiquette" : "Nouvelle étiquette"}</DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Mettez à jour les informations de ce membre."
-              : "Invitez un nouveau membre à rejoindre l'équipe MadiShop."}
+              ? "Mettez à jour le nom ou la couleur de cette étiquette."
+              : "Créez une étiquette pour classer vos tâches."}
           </DialogDescription>
         </DialogHeader>
 
@@ -102,37 +98,9 @@ export function MemberFormDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nom complet</FormLabel>
+                  <FormLabel>Nom</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex : Fatou Diop" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Adresse e-mail</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="prenom.nom@madishop.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="role"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Rôle / service</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ex : Développeur, Marketing..." {...field} />
+                    <Input placeholder="Ex : Urgent, Marketing..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -146,7 +114,7 @@ export function MemberFormDialog({
                 <FormItem>
                   <FormLabel>Couleur</FormLabel>
                   <div className="flex flex-wrap gap-2">
-                    {MEMBER_COLORS.map((color) => (
+                    {LABEL_COLORS.map((color) => (
                       <button
                         key={color}
                         type="button"
@@ -169,7 +137,7 @@ export function MemberFormDialog({
                 Annuler
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
-                {isEditing ? "Enregistrer" : "Ajouter"}
+                {isEditing ? "Enregistrer" : "Créer"}
               </Button>
             </DialogFooter>
           </form>

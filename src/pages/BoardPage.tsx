@@ -35,9 +35,9 @@ export function BoardPage() {
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null)
 
   useEffect(() => {
-    if (!hasLoadedTasks) fetchTasks()
-    if (!hasLoadedMembers) fetchMembers()
-    if (!hasLoadedLabels) fetchLabels()
+    if (!hasLoadedTasks) void fetchTasks()
+    if (!hasLoadedMembers) void fetchMembers()
+    if (!hasLoadedLabels) void fetchLabels()
   }, [hasLoadedTasks, hasLoadedMembers, hasLoadedLabels, fetchTasks, fetchMembers, fetchLabels])
 
   const filteredTasks = useMemo(() => {
@@ -66,8 +66,12 @@ export function BoardPage() {
 
   async function handleDeleteConfirmed() {
     if (!taskToDelete) return
-    await removeTask(taskToDelete.id)
-    toast.success("Tâche supprimée")
+    try {
+      await removeTask(taskToDelete.id)
+      toast.success("Tâche supprimée")
+    } catch {
+      // L'erreur est déjà signalée par le store via un toast.
+    }
   }
 
   if (isLoading) {

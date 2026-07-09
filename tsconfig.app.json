@@ -20,6 +20,9 @@
       "@/*": ["./src/*"]
     },
 
+    /* Type checking */
+    "strict": true,
+
     /* Linting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,

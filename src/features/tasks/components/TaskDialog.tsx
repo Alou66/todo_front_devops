@@ -99,12 +99,16 @@ export function TaskDialog({
 
   async function onSubmit(values: TaskFormValues) {
     const payload = { ...values, description: values.description ?? "" }
-    if (task) {
-      await editTask(task.id, payload)
-    } else {
-      await addTask(payload)
+    try {
+      if (task) {
+        await editTask(task.id, payload)
+      } else {
+        await addTask(payload)
+      }
+      onOpenChange(false)
+    } catch {
+      // L'erreur est déjà signalée par le store via un toast ; on garde le dialog ouvert.
     }
-    onOpenChange(false)
   }
 
   const selectedLabelIds = form.watch("labelIds")

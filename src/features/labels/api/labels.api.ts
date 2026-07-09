@@ -18,6 +18,17 @@ export async function createLabel(input: TaskLabelInput): Promise<TaskLabel> {
   return networkDelay(label)
 }
 
+export async function updateLabel(id: string, patch: Partial<TaskLabelInput>): Promise<TaskLabel> {
+  const labels = getAll()
+  const index = labels.findIndex((l) => l.id === id)
+  if (index === -1) throw new Error("Étiquette introuvable")
+  const updated: TaskLabel = { ...labels[index], ...patch }
+  const next = [...labels]
+  next[index] = updated
+  writeCollection(STORAGE_KEYS.labels, next)
+  return networkDelay(updated)
+}
+
 export async function deleteLabel(id: string): Promise<void> {
   const labels = getAll().filter((l) => l.id !== id)
   writeCollection(STORAGE_KEYS.labels, labels)

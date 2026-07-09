@@ -14,6 +14,10 @@ const PAGE_TITLES: Record<string, { title: string; description: string }> = {
     title: "Équipe",
     description: "Gérez les membres qui peuvent recevoir des tâches.",
   },
+  "/etiquettes": {
+    title: "Étiquettes",
+    description: "Créez et gérez les étiquettes utilisées pour classer vos tâches.",
+  },
 }
 
 export function Header() {
