@@ -36,7 +36,20 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           FRONT_HOST: ${{ secrets.FRONT_HOST }}
           IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-frontend:latest
+          AWS_ACCESS_KEY_ID: ${{ secrets.CI_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CI_AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: eu-west-3
+          FRONT_SG_ID: sg-0b1530406008e8eb0
         run: |
+          # Le SG du Front n'autorise en permanence le SSH que depuis l'IP
+          # admin (voir infra/terraform). Les runners GitHub Actions ont une
+          # IP différente à chaque run : on l'ajoute temporairement le temps
+          # du déploiement, puis on la retire (trap = même en cas d'échec).
+          RUNNER_IP=$(curl -s https://api.ipify.org)
+          aws ec2 authorize-security-group-ingress \
+            --group-id "$FRONT_SG_ID" --protocol tcp --port 22 --cidr "${RUNNER_IP}/32"
+          trap 'aws ec2 revoke-security-group-ingress --group-id "$FRONT_SG_ID" --protocol tcp --port 22 --cidr "${RUNNER_IP}/32" || true' EXIT
+
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
