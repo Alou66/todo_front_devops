@@ -42,7 +42,7 @@ export function SidebarBrand() {
       </div>
       <div className="leading-tight">
         <p className="text-sm font-semibold text-sidebar-foreground">MadiShop</p>
-        <p className="text-xs text-sidebar-foreground/60">Gestion des tâches</p>
+        <p className="text-xs text-sidebar-foreground/60">Gestion des tâches alou</p>
       </div>
     </div>
   )
